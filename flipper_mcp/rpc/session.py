@@ -305,10 +305,10 @@ def decode_framebuffer(data: bytes, orientation: int = 0):
                 px[x, y] = 0  # lit pixel -> black
     if orientation == 1:      # HORIZONTAL_FLIP
         img = img.transpose(Image.ROTATE_180)
-    elif orientation == 2:    # VERTICAL
-        img = img.transpose(Image.ROTATE_90)
-    elif orientation == 3:    # VERTICAL_FLIP
+    elif orientation == 2:    # VERTICAL (e.g. Infrared universal remotes): turn clockwise
         img = img.transpose(Image.ROTATE_270)
+    elif orientation == 3:    # VERTICAL_FLIP
+        img = img.transpose(Image.ROTATE_90)
     return img
 
 

@@ -1,0 +1,4 @@
+> LCD Contrast   <  0  >
+  LCD Backlight  < 100%
+  Backlight Time < 30min
+  LED Brightness < 100%

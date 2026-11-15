@@ -211,6 +211,66 @@ def flipper_press(key: str, type: str = "SHORT") -> str:
     return f"pressed {key} ({type})"
 
 
+# ------------------------------------------------- screen as text + navigation
+# These run the press->look loop next to the device and return the screen as text
+# (read by exact matching against the firmware's own bitmap fonts), so an agent
+# can do multi-step navigation in one call instead of screenshot round trips.
+
+
+def _run_live(op: str, fn) -> str:
+    from .fz.cli import render
+
+    with get_device().live() as eng:
+        res = dict(fn(eng))
+        res.setdefault("screen", eng.snapshot())
+    return render(op, res)
+
+
+@mcp.tool()
+def flipper_read_screen() -> str:
+    """Read the Flipper screen as text ('>' marks the highlighted row). Much cheaper than flipper_screenshot; use the screenshot only for icons/graphics."""
+    from .fz.cli import fmt_screen
+
+    with get_device().live() as eng:
+        return fmt_screen(eng.snapshot())
+
+
+@mcp.tool()
+def flipper_keys(keys: list[str], until: str | None = None, gone: str | None = None,
+                 stable_ms: int | None = None, timeout: float = 5.0) -> str:
+    """Press a key sequence in one call and return the resulting screen as text.
+
+    keys: up down left right ok back; 'long:ok', 'hold:ok:2' (seconds), 'wait:0.5', 'down*3'.
+    until / gone: wait until this text appears / disappears; stable_ms: wait until the screen stops changing.
+    """
+    return _run_live("keys", lambda e: e.keys(keys, until, gone, stable_ms, timeout))
+
+
+@mcp.tool()
+def flipper_select(item: str, press_ok: bool = True) -> str:
+    """Highlight a named item in the current on-screen list (scrolling as needed) and press OK. Works on Momentum's carousel main menu too."""
+    return _run_live("select", lambda e: e.select(item, press_ok))
+
+
+@mcp.tool()
+def flipper_goto(path: str) -> str:
+    """Open an app and walk its menus by name in one call, e.g. 'Sub-GHz/Frequency Analyzer' or 'Infrared/Universal Remotes/TVs'. App names: `loader list`."""
+    return _run_live("goto", lambda e: e.goto(path))
+
+
+@mcp.tool()
+def flipper_back(home: bool = False) -> str:
+    """Press BACK once, or home=True to back out of every app to the desktop (stops and says so if a screen ignores BACK)."""
+    return _run_live("back", lambda e: e.back(home))
+
+
+@mcp.tool()
+def flipper_wait(until: str | None = None, gone: str | None = None, stable_ms: int | None = None,
+                 timeout: float = 10.0) -> str:
+    """Wait until text appears / disappears on screen, or until the screen stops changing; returns the screen as text."""
+    return _run_live("wait", lambda e: e.wait(until, gone, stable_ms, timeout))
+
+
 # ------------------------------------------------------------------- system
 
 @mcp.tool()

@@ -26,7 +26,13 @@ Most Flipper MCP servers just wrap the serial CLI. `flipper-mcp` goes further:
   → **upload to the SD card and launch** — all over USB, no COM port required.
 - 📸 **Screenshots + reliable virtual buttons.** Capture the 128×64 framebuffer as a
   PNG, and send `PRESS → SHORT/LONG → RELEASE` button sequences that actually register.
-- 🧰 **35 tools** covering device info, power telemetry, SD-card storage (md5-verified
+- 📝 **Screen as text + navigation by name.** `flipper_read_screen` reads the display
+  as text by exact matching against the firmware's own bitmap fonts (`>` marks the
+  highlighted row). `flipper_goto("Sub-GHz/Frequency Analyzer")`, `flipper_select`,
+  and `flipper_keys(..., until="Read")` run the press→look loop next to the device,
+  so multi-step navigation is one tool call instead of screenshot round trips. Also
+  available as a shell CLI, `fz` ([`docs/fz.md`](docs/fz.md)).
+- 🧰 **41 tools** covering device info, power telemetry, SD-card storage (md5-verified
   binary transfer), Sub-GHz, NFC, RFID, Infrared (+ universal remotes), GPIO, I²C,
   iButton, LED, vibro, app control, and a raw CLI passthrough for everything else.
 
@@ -75,7 +81,7 @@ Then check `/mcp` inside Claude Code. Environment overrides:
 > **Windows:** if no `COMx` exists, the raw WinUSB transport is used automatically.
 > See [`docs/setup.md`](docs/setup.md) for the full per-OS guide.
 
-## Tools (35)
+## Tools (41)
 
 | Domain | Tools |
 |---|---|
@@ -84,6 +90,7 @@ Then check `/mcp` inside Claude Code. Environment overrides:
 | **CLI** | `flipper_cli`, `flipper_cli_stream` |
 | **Storage (SD / flash)** | `flipper_list_dir`, `flipper_stat`, `flipper_storage_space`, `flipper_read_file`, `flipper_write_file`, `flipper_upload_file`, `flipper_mkdir`, `flipper_delete`, `flipper_rename` |
 | **GUI** | `flipper_screenshot`, `flipper_press` |
+| **Screen as text / navigation** | `flipper_read_screen`, `flipper_keys`, `flipper_select`, `flipper_goto`, `flipper_back`, `flipper_wait` |
 | **Radio / subsystems** | `flipper_led`, `flipper_vibro`, `flipper_gpio`, `flipper_ir_send`, `flipper_ir_universal`, `flipper_subghz_tx_file`, `flipper_subghz_rx` |
 | **Apps** | `flipper_list_apps`, `flipper_app_start`, `flipper_app_exit` |
 | **FAP development** | `fap_scaffold`, `fap_build`, `fap_deploy` |

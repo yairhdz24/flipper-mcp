@@ -4,6 +4,7 @@ libusb-package>=1.0
 mcp>=1.27,<2
 protobuf>=5
 pillow>=10
+numpy>=1.24
 # Only needed to (re)compile the protobuf schema (scripts/compile_protos.py).
 # The generated *_pb2.py are already committed under flipper_mcp/rpc/proto/.
 grpcio-tools>=1.60

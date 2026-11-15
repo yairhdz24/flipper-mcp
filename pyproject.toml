@@ -30,6 +30,7 @@ dependencies = [
     "mcp>=1.27,<2",
     "protobuf>=5",
     "pillow>=10",
+    "numpy>=1.24",
 ]
 
 [project.urls]
@@ -42,12 +43,14 @@ proto = ["grpcio-tools>=1.60"]
 
 [project.scripts]
 flipper-mcp = "flipper_mcp.server:main"
+fz = "flipper_mcp.fz.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["flipper_mcp*"]
 
 [tool.setuptools.package-data]
 "flipper_mcp.rpc.proto" = ["*.py"]
+"flipper_mcp.screen" = ["fonts/*.u8f"]
 
 [tool.ruff]
 # Generated protobuf modules are not hand-maintained; don't lint them.

@@ -15,12 +15,15 @@ from .base import Transport, TransportError
 class SerialTransport(Transport):
     kind = "serial"
 
-    def __init__(self, port: str, baudrate: int = 230400):
+    def __init__(self, port: str, baudrate: int = 230400, exclusive: bool = False):
         self._portname = port
         try:
             # timeout=0 -> non-blocking reads; we set a per-read timeout in read().
+            # exclusive=True takes an advisory lock (POSIX) so a second program
+            # can't open the port and corrupt the RPC stream.
             self._ser = serial.Serial(port, baudrate=baudrate, timeout=0,
-                                      write_timeout=3, dsrdtr=False)
+                                      write_timeout=3, dsrdtr=False,
+                                      exclusive=True if exclusive else None)
         except Exception as e:  # noqa: BLE001
             raise TransportError(
                 f"could not open {port}: {e}. Is qFlipper or another program holding it?"

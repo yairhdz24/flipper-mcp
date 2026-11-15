@@ -44,24 +44,25 @@ def describe_available() -> dict:
     }
 
 
-def open_transport(prefer: str = "auto", port: str | None = None) -> Transport:
+def open_transport(prefer: str = "auto", port: str | None = None,
+                   exclusive: bool = False) -> Transport:
     """Open the best available transport.
 
     prefer: "auto" (serial then usb), "serial", or "usb".
     port:   explicit COM port to use (implies serial).
     """
     if port:
-        return SerialTransport(port)
+        return SerialTransport(port, exclusive=exclusive)
 
     ports = find_serial_ports()
     if prefer in ("auto", "serial") and ports:
-        return SerialTransport(ports[0])
+        return SerialTransport(ports[0], exclusive=exclusive)
     if prefer in ("auto", "usb") and usb_present():
         return UsbTransport()
     if prefer == "serial" and not ports:
         raise TransportError("No Flipper COM port found. Run the driver fix, or use prefer='usb'.")
     if ports:  # prefer was usb but none present -> last resort
-        return SerialTransport(ports[0])
+        return SerialTransport(ports[0], exclusive=exclusive)
     raise TransportError(
         "No Flipper found: no COM port (VID:PID 0483:5740) and no WinUSB device. "
         "Check the cable, that the Flipper is on, and that qFlipper isn't holding the port."

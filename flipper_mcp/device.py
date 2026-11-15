@@ -7,6 +7,7 @@ All access is serialized with a re-entrant lock so one operation runs at a time.
 
 from __future__ import annotations
 
+import contextlib
 import threading
 from contextlib import contextmanager
 
@@ -27,9 +28,11 @@ def _parse_kv(text: str) -> dict:
 
 
 class FlipperDevice:
-    def __init__(self, prefer: str = "auto", port: str | None = None):
+    def __init__(self, prefer: str = "auto", port: str | None = None, exclusive: bool = False):
         self.prefer = prefer
         self.port = port
+        self.exclusive = exclusive
+        self._fonts: list | None = None
         self.transport = None
         self.cli: FlipperCLI | None = None
         self._lock = threading.RLock()
@@ -40,7 +43,7 @@ class FlipperDevice:
         with self._lock:
             if self.cli is not None:
                 return self
-            self.transport = open_transport(self.prefer, self.port)
+            self.transport = open_transport(self.prefer, self.port, self.exclusive)
             self.cli = FlipperCLI(self.transport).open()
             return self
 
@@ -103,6 +106,30 @@ class FlipperDevice:
                 if sess.active:
                     sess.stop()
                     self.cli.ensure_prompt()
+
+    @contextmanager
+    def live(self):
+        """Streaming RPC session wrapped in a navigation ``Engine`` (screen as text,
+        key sequences with waits, select/goto). Returns to the text CLI on exit."""
+        from .engine import Engine
+        from .live import LiveSession
+
+        with self._lock:
+            self._ensure()
+            self.cli.ensure_prompt()
+            sess = LiveSession(self.transport).start()
+            try:
+                eng = Engine(sess)
+                if self._fonts is None:
+                    # custom asset-pack fonts are optional; fall back to stock fonts
+                    with contextlib.suppress(Exception):
+                        eng.load_asset_pack_fonts()
+                    self._fonts = eng.extra_fonts
+                eng.extra_fonts = self._fonts
+                yield eng
+            finally:
+                sess.stop()
+                self.cli.ensure_prompt()
 
     # -- RPC-backed operations ----------------------------------------------
 

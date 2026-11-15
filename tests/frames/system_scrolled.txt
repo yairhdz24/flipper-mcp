@@ -1,0 +1,4 @@
+  Date Format   D/M/Y>
+  Log Level      Default >
+> Log Device     USART >
+  Log Baud Rate <230400>

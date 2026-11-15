@@ -11,8 +11,8 @@ def _tools():
     return server.mcp._tool_manager.list_tools()
 
 
-def test_registers_exactly_35_tools():
-    assert len(_tools()) == 35
+def test_registers_exactly_41_tools():
+    assert len(_tools()) == 41
 
 
 def test_every_tool_has_name_and_nonempty_description():
@@ -29,5 +29,6 @@ def test_expected_core_tools_present():
         "flipper_status", "flipper_connect", "flipper_device_info",
         "flipper_screenshot", "flipper_press", "flipper_cli",
         "fap_scaffold", "fap_build", "fap_deploy",
+        "flipper_read_screen", "flipper_keys", "flipper_select", "flipper_goto",
     }:
         assert expected in names, f"missing tool {expected}"
